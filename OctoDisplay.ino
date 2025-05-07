@@ -112,8 +112,11 @@ static lv_disp_draw_buf_t draw_buf;
 //static lv_color_t disp_draw_buf2[screenWidth * screenHeight / 10];
 
 // To (1/4 screen buffer):
-static lv_color_t disp_draw_buf1[screenWidth * screenHeight / 4];
-static lv_color_t disp_draw_buf2[screenWidth * screenHeight / 4];
+//static lv_color_t disp_draw_buf1[screenWidth * screenHeight / 4];
+//static lv_color_t disp_draw_buf2[screenWidth * screenHeight / 4];
+
+static lv_color_t disp_draw_buf1[screenWidth * 40]; // 40 rows
+static lv_color_t disp_draw_buf2[screenWidth * 40];
 static lv_disp_drv_t disp_drv;
 
 
@@ -200,7 +203,7 @@ void handleSubmit() {
 void setup()
 {
   Serial.begin(115200);
-  Serial.begin(115200);
+  Serial.printf("Free heap: %d\n", ESP.getFreeHeap()); // Add this line
   Serial.println("\nBooting...");
   WiFi.enableSTA(true);
   Serial.println("LVGL OctoDisplay");
@@ -224,7 +227,7 @@ void setup()
   digitalWrite(35, LOW);
   pinMode(38, OUTPUT);
   digitalWrite(38, LOW);
-  pinMode(0, OUTPUT);//TOUCH-CS
+  //pinMode(0, OUTPUT);//TOUCH-CS
 #endif
 
   //Display Prepare
