@@ -3,10 +3,20 @@
 // LVGL version: 8.3.11
 // Project name: OctoDisplay
 
+// In ui_ScreenIHD.c, keep ONLY ONE definition:
 #include "ui.h"
 
-void ui_ScreenIHD_screen_init(void)
-{
+// Define UI elements HERE (not in header)
+lv_obj_t *ui_GridPower;
+lv_obj_t *ui_GridEnergyOut;
+lv_obj_t *ui_GridEnergyIn;
+
+void ui_ScreenIHD_screen_init(void) {
+
+lv_label_set_text(ui_GridPower, "0 W");
+lv_label_set_text(ui_GridEnergyOut, "0 kWh");
+lv_label_set_text(ui_GridEnergyIn, "0 kWh");
+
 ui_ScreenIHD = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_ScreenIHD, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_bg_color(ui_ScreenIHD, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -20,5 +30,24 @@ lv_obj_set_y( ui_Label6, -93 );
 lv_obj_set_align( ui_Label6, LV_ALIGN_CENTER );
 lv_obj_set_style_text_color(ui_Label6, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_Label6, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_Label6, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_label_set_text(ui_Label6, "Connecting...");
+
+// In ui_ScreenIHD_screen_init()
+// Grid Section
+ui_GridPower = lv_label_create(ui_ScreenIHD);
+lv_obj_set_pos(ui_GridPower, 10, 20);
+lv_label_set_text(ui_GridPower, "0 W");
+
+// Add similar elements for other sections
+// Gas Section
+ui_GridEnergyOut = lv_label_create(ui_ScreenIHD);
+lv_obj_set_pos(ui_GridEnergyOut, 10, 120);
+lv_label_set_text(ui_GridEnergyOut, "Grid>: 0 kWh");
+
+// PV Section
+ui_GridEnergyIn = lv_label_create(ui_ScreenIHD);
+lv_obj_set_pos(ui_GridEnergyIn, 200, 20);
+lv_label_set_text(ui_GridEnergyIn, "Grid<: 0 kWh");
 
 }

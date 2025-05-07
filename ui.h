@@ -22,6 +22,13 @@ extern lv_obj_t *ui_LabelSetupTitle;
 extern lv_obj_t *ui_LabelWiFiNetwork;
 extern lv_obj_t *ui_LabelIPAddress;
 extern lv_obj_t *ui_LabelURL;
+
+// Add these definitions at the top of ui_ScreenIHD.c
+extern lv_obj_t *ui_GridPower;
+extern lv_obj_t *ui_GridEnergyOut;
+extern lv_obj_t *ui_GridEnergyIn;
+
+// ... Add declarations for all other UI elements
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenIHD

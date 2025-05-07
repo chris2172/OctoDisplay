@@ -41,5 +41,6 @@ lv_obj_set_height( ui_LabelURL, LV_SIZE_CONTENT);   /// 1
 lv_obj_set_x( ui_LabelURL, 0 );
 lv_obj_set_y( ui_LabelURL, 11 );
 lv_obj_set_align( ui_LabelURL, LV_ALIGN_CENTER );
+lv_label_set_text(ui_LabelURL, "Waiting for configuration...");
 
 }
