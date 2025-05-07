@@ -658,3 +658,255 @@ void loop() {
 }
 
 ```
+
+Question 4:
+Server Provided in the settings.
+
+I need the values from the following MQTT Topics
+elecrow/grid/power/state
+elecrow/grid/energy_in/state
+elecrow/grid/energy_out/state
+elecrow/grid/price_in/state
+elecrow/grid/price_out/state
+
+This project will have many more in the following format
+elecrow/pv
+elecrow/load
+elecrow/battery
+elecrow/inverter
+elecrow/car
+
+All with sub topics so I need the code to be easily editable to add additional topics
+
+'''C
+#include <WiFi.h>
+#include <WebServer.h>
+#include <Preferences.h>
+#include <PubSubClient.h>
+#include <Wire.h>
+#include <SPI.h>
+#include <lvgl.h>
+#include "ui.h"
+#include "gfx_conf.h"
+
+// -----------------------------
+// Display-related declarations
+// -----------------------------
+static lv_disp_draw_buf_t draw_buf;
+static lv_color_t disp_draw_buf1[screenWidth * screenHeight / 10];
+static lv_color_t disp_draw_buf2[screenWidth * screenHeight / 10];
+static lv_disp_drv_t disp_drv;
+
+// -----------------------------
+// Nonvolatile storage and web server
+// -----------------------------
+Preferences preferences;
+const String defaultMQTTPort = "1883";
+WebServer server(80);
+bool configMissing = false;
+
+// -----------------------------
+// Reset button settings
+// -----------------------------
+const int resetButtonPin = 0;   // Choose appropriate pin (make sure it does not conflict)
+unsigned long buttonPressStart = 0;
+const unsigned long holdDuration = 20000;  // 20 seconds
+
+// -----------------------------
+// MQTT declarations
+// -----------------------------
+WiFiClient wifiClient;
+PubSubClient mqttClient(wifiClient);
+
+// List your MQTT topics here. Additional topics and subtopics can be added to this list.
+const char* mqttTopics[] = {
+  "elecrow/grid/power/state",
+  "elecrow/grid/energy_in/state",
+  "elecrow/grid/energy_out/state",
+  "elecrow/grid/price_in/state",
+  "elecrow/grid/price_out/state",
+  // You can easily add more topics under different branches:
+  // "elecrow/pv/state", "elecrow/load/state", etc.
+};
+const int numTopics = sizeof(mqttTopics) / sizeof(mqttTopics[0]);
+
+// MQTT callback: handles inbound messages
+void mqttCallback(char* topic, byte* payload, unsigned int length) {
+  String message;
+  for (unsigned int i = 0; i < length; i++) {
+    message += (char)payload[i];
+  }
+  Serial.print("Received on topic [");
+  Serial.print(topic);
+  Serial.print("]: ");
+  Serial.println(message);
+
+  // Example: Update display or global variables based on topic
+  // if (String(topic) == "elecrow/grid/power/state") {
+  //     ui_LabelPower->setText(message.c_str());
+  // }
+  // Add similar conditional blocks for other topics (or use a lookup table)
+}
+
+// Attempt an MQTT connection and subscribe to the topics.
+void mqttConnect() {
+  // The client ID can be set to any unique string (or consider using a unique value)
+  while (!mqttClient.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    if (mqttClient.connect("ESP32DisplayClient")) {
+      Serial.println(" connected.");
+      // Subscribe to every topic in the list.
+      for (int i = 0; i < numTopics; i++) {
+        if (mqttClient.subscribe(mqttTopics[i])) {
+          Serial.print("Subscribed to: ");
+          Serial.println(mqttTopics[i]);
+        } else {
+          Serial.print("Failed subscription: ");
+          Serial.println(mqttTopics[i]);
+        }
+      }
+    } else {
+      Serial.print("Failed, rc=");
+      Serial.print(mqttClient.state());
+      Serial.println("; try again in 5 seconds");
+      delay(5000);
+    }
+  }
+}
+
+// -----------------------------
+// Configuration Portal Web Handlers
+// -----------------------------
+void handleRoot() {
+    String page = "<!DOCTYPE html>"
+                  "<html lang='en'>"
+                  "<head>"
+                  "  <meta charset='UTF-8'>"
+                  "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                  "  <title>Device Configuration</title>"
+                  "  <style>"
+                  "    body { font-family: Arial, sans-serif; background-color: #f7f7f7; margin:0; padding:0; }"
+                  "    .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 8px;"
+                  "                 box-shadow: 0 2px 8px rgba(0,0,0,0.1); }"
+                  "    h1 { text-align: center; color: #333; margin-bottom: 30px; }"
+                  "    form { display: flex; flex-direction: column; }"
+                  "    label { margin: 10px 0 5px; font-weight: bold; }"
+                  "    input[type='text'], input[type='password'] { padding: 10px; border: 1px solid #ccc;"
+                  "                 border-radius: 4px; font-size: 16px; }"
+                  "    input[type='submit'] { margin-top: 20px; padding: 10px; background-color: #4CAF50; "
+                  "                 border: none; border-radius: 4px; color: #fff; font-size: 16px; cursor: pointer; }"
+                  "    input[type='submit']:hover { background-color: #45a049; }"
+                  "  </style>"
+                  "</head>"
+                  "<body>"
+                  "  <div class='container'>"
+                  "    <h1>Configure Your Device</h1>"
+                  "    <form method='POST' action='/save'>"
+                  "      <label for='wifiSSID'>Wifi SSID:</label>"
+                  "      <input type='text' id='wifiSSID' name='wifiSSID'>"
+                  "      <label for='wifiPass'>Wifi Password:</label>"
+                  "      <input type='password' id='wifiPass' name='wifiPass'>"
+                  "      <label for='haAPI'>Home Assistant API:</label>"
+                  "      <input type='text' id='haAPI' name='haAPI'>"
+                  "      <label for='haIP'>Home Assistant IP:</label>"
+                  "      <input type='text' id='haIP' name='haIP'>"
+                  "      <label for='mqttHost'>MQTT Host:</label>"
+                  "      <input type='text' id='mqttHost' name='mqttHost'>"
+                  "      <label for='mqttUser'>MQTT User:</label>"
+                  "      <input type='text' id='mqttUser' name='mqttUser'>"
+                  "      <label for='mqttPass'>MQTT Password:</label>"
+                  "      <input type='password' id='mqttPass' name='mqttPass'>"
+                  "      <label for='mqttPort'>MQTT Port:</label>"
+                  "      <input type='text' id='mqttPort' name='mqttPort' placeholder='1883'>"
+                  "      <input type='submit' value='Submit'>"
+                  "    </form>"
+                  "  </div>"
+                  "</body>"
+                  "</html>";
+    server.send(200, "text/html", page);
+}
+
+void handleSave() {
+    if (server.method() == HTTP_POST) {
+        preferences.begin("config", false);
+        // Save all configuration values
+        preferences.putString("wifiSSID", server.arg("wifiSSID"));
+        preferences.putString("wifiPass", server.arg("wifiPass"));
+        preferences.putString("haAPI", server.arg("haAPI"));
+        preferences.putString("haIP", server.arg("haIP"));
+        preferences.putString("mqttHost", server.arg("mqttHost"));
+        preferences.putString("mqttUser", server.arg("mqttUser"));
+        preferences.putString("mqttPass", server.arg("mqttPass"));
+
+        String port = server.arg("mqttPort");
+        if (port == "") {
+            port = defaultMQTTPort;
+        }
+        preferences.putString("mqttPort", port);
+        preferences.end();
+
+        server.send(200, "text/html", "Settings saved. The device will now restart.");
+        delay(2000);
+        ESP.restart();
+    }
+}
+
+void startConfigPortal() {
+    WiFi.softAP("OctoDisplay");
+    IPAddress ip = WiFi.softAPIP();
+    Serial.print("AP started. Connect to AP IP: ");
+    Serial.println(ip);
+
+    // Update the display’s setup screen LabelURL if needed:
+    // ui_LabelURL->setText(ip.toString().c_str());
+
+    server.on("/", HTTP_GET, handleRoot);
+    server.on("/save", HTTP_POST, handleSave);
+    server.begin();
+    Serial.println("Configuration web server started.");
+}
+
+// -----------------------------
+// LVGL Display and Touch functions (as before)
+// -----------------------------
+void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
+    uint32_t w = (area->x2 - area->x1 + 1);
+    uint32_t h = (area->y2 - area->y1 + 1);
+    tft.pushImageDMA(area->x1, area->y1, w, h, (lgfx::rgb565_t*)&color_p->full);
+    lv_disp_flush_ready(disp);
+}
+
+void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
+    uint16_t touchX, touchY;
+    bool touched = tft.getTouch(&touchX, &touchY);
+    if (!touched) {
+        data->state = LV_INDEV_STATE_REL;
+    } else {
+        data->state = LV_INDEV_STATE_PR;
+        data->point.x = touchX;
+        data->point.y = touchY;
+        Serial.print("Data x ");
+        Serial.println(touchX);
+        Serial.print("Data y ");
+        Serial.println(touchY);
+    }
+}
+
+// -----------------------------
+// Load configurations and mark as missing if needed.
+// -----------------------------
+void loadConfigurations() {
+    preferences.begin("config", false);
+    String wifiSSID = preferences.getString("wifiSSID", "");
+    String wifiPass = preferences.getString("wifiPass", "");
+    String haAPI    = preferences.getString("haAPI", "");
+    String haIP     = preferences.getString("haIP", "");
+    String mqttHost = preferences.getString("mqttHost", "");
+    String mqttUser = preferences.getString("mqttUser", "");
+    String mqttPass = preferences.getString("mqttPass", "");
+    String mqttPort = preferences.getString("mqttPort", "");
+    
+    // Check for essential values
+    if (wifiSSID == "" || wifiPass == "" || haAPI == "" || haIP == "" ||
+        mqtt
+'''
