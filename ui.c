@@ -21,6 +21,31 @@ lv_obj_t *ui_LabelURL;
 void ui_ScreenIHD_screen_init(void);
 lv_obj_t *ui_ScreenIHD;
 lv_obj_t *ui_Label6;
+lv_obj_t *ui_PanelGrid;
+lv_obj_t *ui_GridPower;
+lv_obj_t *ui_GridEnergyIn;
+lv_obj_t *ui_GridEnergyOut;
+lv_obj_t *ui_GridEnergyOutPrice;
+lv_obj_t *ui_GridEnergyInPrice;
+lv_obj_t *ui_PanelLoad;
+lv_obj_t *ui_LoadPower;
+lv_obj_t *ui_LoadEnergy;
+lv_obj_t *ui_PanelPV;
+lv_obj_t *ui_PVPower;
+lv_obj_t *ui_PVEnergy;
+lv_obj_t *ui_PanelBattery;
+lv_obj_t *ui_BatteryPower;
+lv_obj_t *ui_BatteryEnergyIn;
+lv_obj_t *ui_BatteryEnergyOut;
+lv_obj_t *ui_BatterySOC;
+lv_obj_t *ui_BatteryTemp;
+lv_obj_t *ui_PanelCar;
+lv_obj_t *ui_CarSOC;
+lv_obj_t *ui_CarPlug;
+lv_obj_t *ui_CarRange;
+lv_obj_t *ui_CarMode;
+lv_obj_t *ui_CarPower;
+lv_obj_t *ui_CarLastCharge;
 // CUSTOM VARIABLES
 
 // EVENTS

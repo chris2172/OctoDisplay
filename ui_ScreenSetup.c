@@ -38,9 +38,9 @@ lv_label_set_text(ui_LabelIPAddress,"Go to IP Address");
 ui_LabelURL = lv_label_create(ui_ScreenSetup);
 lv_obj_set_width( ui_LabelURL, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_LabelURL, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_LabelURL, 0 );
+lv_obj_set_x( ui_LabelURL, -2 );
 lv_obj_set_y( ui_LabelURL, 11 );
 lv_obj_set_align( ui_LabelURL, LV_ALIGN_CENTER );
-lv_label_set_text(ui_LabelURL, "Waiting for configuration...");
+lv_label_set_text(ui_LabelURL,"Visit: http://192.168.4.1");
 
 }

@@ -3,20 +3,10 @@
 // LVGL version: 8.3.11
 // Project name: OctoDisplay
 
-// In ui_ScreenIHD.c, keep ONLY ONE definition:
 #include "ui.h"
 
-// Define UI elements HERE (not in header)
-lv_obj_t *ui_GridPower;
-lv_obj_t *ui_GridEnergyOut;
-lv_obj_t *ui_GridEnergyIn;
-
-void ui_ScreenIHD_screen_init(void) {
-
-lv_label_set_text(ui_GridPower, "0 W");
-lv_label_set_text(ui_GridEnergyOut, "0 kWh");
-lv_label_set_text(ui_GridEnergyIn, "0 kWh");
-
+void ui_ScreenIHD_screen_init(void)
+{
 ui_ScreenIHD = lv_obj_create(NULL);
 lv_obj_clear_flag( ui_ScreenIHD, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
 lv_obj_set_style_bg_color(ui_ScreenIHD, lv_color_hex(0x000000), LV_PART_MAIN | LV_STATE_DEFAULT );
@@ -25,29 +15,282 @@ lv_obj_set_style_bg_opa(ui_ScreenIHD, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 ui_Label6 = lv_label_create(ui_ScreenIHD);
 lv_obj_set_width( ui_Label6, LV_SIZE_CONTENT);  /// 1
 lv_obj_set_height( ui_Label6, LV_SIZE_CONTENT);   /// 1
-lv_obj_set_x( ui_Label6, 7 );
-lv_obj_set_y( ui_Label6, -93 );
+lv_obj_set_x( ui_Label6, 1 );
+lv_obj_set_y( ui_Label6, -120 );
 lv_obj_set_align( ui_Label6, LV_ALIGN_CENTER );
 lv_obj_set_style_text_color(ui_Label6, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
 lv_obj_set_style_text_opa(ui_Label6, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
-lv_obj_set_style_text_font(ui_Label6, &lv_font_montserrat_24, LV_PART_MAIN | LV_STATE_DEFAULT);
+lv_obj_set_style_text_font(ui_Label6, &lv_font_montserrat_30, LV_PART_MAIN| LV_STATE_DEFAULT);
 lv_label_set_text(ui_Label6, "Connecting...");
 
-// In ui_ScreenIHD_screen_init()
-// Grid Section
-ui_GridPower = lv_label_create(ui_ScreenIHD);
-lv_obj_set_pos(ui_GridPower, 10, 20);
-lv_label_set_text(ui_GridPower, "0 W");
+ui_PanelGrid = lv_obj_create(ui_ScreenIHD);
+lv_obj_set_width( ui_PanelGrid, 164);
+lv_obj_set_height( ui_PanelGrid, 112);
+lv_obj_set_x( ui_PanelGrid, 149 );
+lv_obj_set_y( ui_PanelGrid, 70 );
+lv_obj_set_align( ui_PanelGrid, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_PanelGrid, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_PanelGrid, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_PanelGrid, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
 
-// Add similar elements for other sections
-// Gas Section
-ui_GridEnergyOut = lv_label_create(ui_ScreenIHD);
-lv_obj_set_pos(ui_GridEnergyOut, 10, 120);
-lv_label_set_text(ui_GridEnergyOut, "Grid>: 0 kWh");
+ui_GridPower = lv_label_create(ui_PanelGrid);
+lv_obj_set_width( ui_GridPower, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_GridPower, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_GridPower, 1 );
+lv_obj_set_y( ui_GridPower, -37 );
+lv_obj_set_align( ui_GridPower, LV_ALIGN_CENTER );
+lv_label_set_text(ui_GridPower,"Grid: 0W");
+lv_obj_set_style_text_color(ui_GridPower, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_GridPower, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_GridPower, "Grid: 0W");
 
-// PV Section
-ui_GridEnergyIn = lv_label_create(ui_ScreenIHD);
-lv_obj_set_pos(ui_GridEnergyIn, 200, 20);
-lv_label_set_text(ui_GridEnergyIn, "Grid<: 0 kWh");
+ui_GridEnergyIn = lv_label_create(ui_PanelGrid);
+lv_obj_set_width( ui_GridEnergyIn, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_GridEnergyIn, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_GridEnergyIn, 2 );
+lv_obj_set_y( ui_GridEnergyIn, -15 );
+lv_obj_set_align( ui_GridEnergyIn, LV_ALIGN_CENTER );
+lv_label_set_text(ui_GridEnergyIn,"Grid In: 0kWh");
+lv_obj_set_style_text_color(ui_GridEnergyIn, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_GridEnergyIn, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_GridEnergyIn, "Grid In: 0kWh");
+
+ui_GridEnergyOut = lv_label_create(ui_PanelGrid);
+lv_obj_set_width( ui_GridEnergyOut, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_GridEnergyOut, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_GridEnergyOut, 0 );
+lv_obj_set_y( ui_GridEnergyOut, 5 );
+lv_obj_set_align( ui_GridEnergyOut, LV_ALIGN_CENTER );
+lv_label_set_text(ui_GridEnergyOut,"Grid Out: 0kWh");
+lv_obj_set_style_text_color(ui_GridEnergyOut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_GridEnergyOut, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_GridEnergyOut, "Grid Out: 0kWh");
+
+ui_GridEnergyOutPrice = lv_label_create(ui_PanelGrid);
+lv_obj_set_width( ui_GridEnergyOutPrice, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_GridEnergyOutPrice, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_GridEnergyOutPrice, -2 );
+lv_obj_set_y( ui_GridEnergyOutPrice, 23 );
+lv_obj_set_align( ui_GridEnergyOutPrice, LV_ALIGN_CENTER );
+lv_label_set_text(ui_GridEnergyOutPrice,"Grid Out: $0.15");
+lv_obj_set_style_text_color(ui_GridEnergyOutPrice, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_GridEnergyOutPrice, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_GridEnergyOutPrice, "Grid Out: 15p");
+
+ui_GridEnergyInPrice = lv_label_create(ui_PanelGrid);
+lv_obj_set_width( ui_GridEnergyInPrice, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_GridEnergyInPrice, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_GridEnergyInPrice, -2 );
+lv_obj_set_y( ui_GridEnergyInPrice, 42 );
+lv_obj_set_align( ui_GridEnergyInPrice, LV_ALIGN_CENTER );
+lv_label_set_text(ui_GridEnergyInPrice,"Grid In: $0.28");
+lv_obj_set_style_text_color(ui_GridEnergyInPrice, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_GridEnergyInPrice, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_GridEnergyOutPrice, "Grid In: 28p");
+
+ui_PanelLoad = lv_obj_create(ui_ScreenIHD);
+lv_obj_set_width( ui_PanelLoad, 155);
+lv_obj_set_height( ui_PanelLoad, 62);
+lv_obj_set_x( ui_PanelLoad, 149 );
+lv_obj_set_y( ui_PanelLoad, -34 );
+lv_obj_set_align( ui_PanelLoad, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_PanelLoad, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_PanelLoad, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_PanelLoad, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_LoadPower = lv_label_create(ui_PanelLoad);
+lv_obj_set_width( ui_LoadPower, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_LoadPower, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_LoadPower, 1 );
+lv_obj_set_y( ui_LoadPower, -11 );
+lv_obj_set_align( ui_LoadPower, LV_ALIGN_CENTER );
+lv_label_set_text(ui_LoadPower,"Load Power: 0W");
+lv_obj_set_style_text_color(ui_LoadPower, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_LoadPower, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_LoadPower, "Load: 0W");
+
+ui_LoadEnergy = lv_label_create(ui_PanelLoad);
+lv_obj_set_width( ui_LoadEnergy, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_LoadEnergy, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_LoadEnergy, 1 );
+lv_obj_set_y( ui_LoadEnergy, 8 );
+lv_obj_set_align( ui_LoadEnergy, LV_ALIGN_CENTER );
+lv_label_set_text(ui_LoadEnergy,"Load Energy: 0kWh");
+lv_obj_set_style_text_color(ui_LoadEnergy, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_LoadEnergy, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_LoadEnergy, "Load: 0kWh");
+
+ui_PanelPV = lv_obj_create(ui_ScreenIHD);
+lv_obj_set_width( ui_PanelPV, 151);
+lv_obj_set_height( ui_PanelPV, 64);
+lv_obj_set_x( ui_PanelPV, -161 );
+lv_obj_set_y( ui_PanelPV, -29 );
+lv_obj_set_align( ui_PanelPV, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_PanelPV, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_PanelPV, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_PanelPV, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_PVPower = lv_label_create(ui_PanelPV);
+lv_obj_set_width( ui_PVPower, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_PVPower, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_PVPower, 0 );
+lv_obj_set_y( ui_PVPower, -10 );
+lv_obj_set_align( ui_PVPower, LV_ALIGN_CENTER );
+lv_label_set_text(ui_PVPower,"PV Power: 0W");
+lv_obj_set_style_text_color(ui_PVPower, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_PVPower, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_PVPower, "PV: 0W");
+
+ui_PVEnergy = lv_label_create(ui_PanelPV);
+lv_obj_set_width( ui_PVEnergy, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_PVEnergy, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_PVEnergy, 0 );
+lv_obj_set_y( ui_PVEnergy, 10 );
+lv_obj_set_align( ui_PVEnergy, LV_ALIGN_CENTER );
+lv_label_set_text(ui_PVEnergy,"PV Energy: 0kWh");
+lv_obj_set_style_text_color(ui_PVEnergy, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_PVEnergy, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_PVPower, "PV: 0kWh");
+
+ui_PanelBattery = lv_obj_create(ui_ScreenIHD);
+lv_obj_set_width( ui_PanelBattery, 164);
+lv_obj_set_height( ui_PanelBattery, 118);
+lv_obj_set_x( ui_PanelBattery, -156 );
+lv_obj_set_y( ui_PanelBattery, 71 );
+lv_obj_set_align( ui_PanelBattery, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_PanelBattery, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_PanelBattery, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_PanelBattery, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_BatteryPower = lv_label_create(ui_PanelBattery);
+lv_obj_set_width( ui_BatteryPower, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_BatteryPower, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_BatteryPower, -5 );
+lv_obj_set_y( ui_BatteryPower, -43 );
+lv_obj_set_align( ui_BatteryPower, LV_ALIGN_CENTER );
+lv_label_set_text(ui_BatteryPower,"BatteryPower: 0W");
+lv_obj_set_style_text_color(ui_BatteryPower, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_BatteryPower, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_BatteryPower, "Battery: 0W");
+
+ui_BatteryEnergyIn = lv_label_create(ui_PanelBattery);
+lv_obj_set_width( ui_BatteryEnergyIn, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_BatteryEnergyIn, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_BatteryEnergyIn, -7 );
+lv_obj_set_y( ui_BatteryEnergyIn, -20 );
+lv_obj_set_align( ui_BatteryEnergyIn, LV_ALIGN_CENTER );
+lv_label_set_text(ui_BatteryEnergyIn,"Battery In: 0kWh");
+lv_obj_set_style_text_color(ui_BatteryEnergyIn, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_BatteryEnergyIn, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_BatteryEnergyIn, "Battery In: 0kWh");
+
+ui_BatteryEnergyOut = lv_label_create(ui_PanelBattery);
+lv_obj_set_width( ui_BatteryEnergyOut, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_BatteryEnergyOut, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_BatteryEnergyOut, -3 );
+lv_obj_set_y( ui_BatteryEnergyOut, 2 );
+lv_obj_set_align( ui_BatteryEnergyOut, LV_ALIGN_CENTER );
+lv_label_set_text(ui_BatteryEnergyOut,"Battery Out: 0kWh");
+lv_obj_set_style_text_color(ui_BatteryEnergyOut, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_BatteryEnergyOut, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_BatteryEnergyOut, "Battery Out: 0kWh");
+
+ui_BatterySOC = lv_label_create(ui_PanelBattery);
+lv_obj_set_width( ui_BatterySOC, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_BatterySOC, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_BatterySOC, -10 );
+lv_obj_set_y( ui_BatterySOC, 23 );
+lv_obj_set_align( ui_BatterySOC, LV_ALIGN_CENTER );
+lv_label_set_text(ui_BatterySOC,"Battery SOC: 0%");
+lv_obj_set_style_text_color(ui_BatterySOC, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_BatterySOC, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_BatterySOC, "Battery SOC: 100%");
+
+ui_BatteryTemp = lv_label_create(ui_PanelBattery);
+lv_obj_set_width( ui_BatteryTemp, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_BatteryTemp, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_BatteryTemp, -5 );
+lv_obj_set_y( ui_BatteryTemp, 43 );
+lv_obj_set_align( ui_BatteryTemp, LV_ALIGN_CENTER );
+lv_label_set_text(ui_BatteryTemp,"Battery Temp: 10°C");
+lv_obj_set_style_text_color(ui_BatteryTemp, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_BatteryTemp, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_BatteryTemp, "Battery Temp: 34°C");
+
+ui_PanelCar = lv_obj_create(ui_ScreenIHD);
+lv_obj_set_width( ui_PanelCar, 119);
+lv_obj_set_height( ui_PanelCar, 121);
+lv_obj_set_x( ui_PanelCar, -4 );
+lv_obj_set_y( ui_PanelCar, 70 );
+lv_obj_set_align( ui_PanelCar, LV_ALIGN_CENTER );
+lv_obj_clear_flag( ui_PanelCar, LV_OBJ_FLAG_SCROLLABLE );    /// Flags
+lv_obj_set_style_bg_color(ui_PanelCar, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_bg_opa(ui_PanelCar, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+
+ui_CarSOC = lv_label_create(ui_PanelCar);
+lv_obj_set_width( ui_CarSOC, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CarSOC, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_CarSOC, 0 );
+lv_obj_set_y( ui_CarSOC, -40 );
+lv_obj_set_align( ui_CarSOC, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CarSOC,"Car SOC: 100%");
+lv_obj_set_style_text_color(ui_CarSOC, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CarSOC, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_CarSOC, "Car: 100%");
+
+ui_CarPlug = lv_label_create(ui_PanelCar);
+lv_obj_set_width( ui_CarPlug, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CarPlug, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_CarPlug, 1 );
+lv_obj_set_y( ui_CarPlug, -21 );
+lv_obj_set_align( ui_CarPlug, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CarPlug,"Not Connected");
+lv_obj_set_style_text_color(ui_CarPlug, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CarPlug, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_CarPlug, "Disconnected");
+
+ui_CarRange = lv_label_create(ui_PanelCar);
+lv_obj_set_width( ui_CarRange, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CarRange, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_CarRange, -3 );
+lv_obj_set_y( ui_CarRange, -5 );
+lv_obj_set_align( ui_CarRange, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CarRange,"125mi");
+lv_obj_set_style_text_color(ui_CarRange, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CarRange, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_CarRange, "Range: 128mi");
+
+ui_CarMode = lv_label_create(ui_PanelCar);
+lv_obj_set_width( ui_CarMode, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CarMode, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_CarMode, -2 );
+lv_obj_set_y( ui_CarMode, 11 );
+lv_obj_set_align( ui_CarMode, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CarMode,"Eco+");
+lv_obj_set_style_text_color(ui_CarMode, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CarMode, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_CarMode, "Mode: Eco+");
+
+ui_CarPower = lv_label_create(ui_PanelCar);
+lv_obj_set_width( ui_CarPower, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CarPower, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_CarPower, -2 );
+lv_obj_set_y( ui_CarPower, 48 );
+lv_obj_set_align( ui_CarPower, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CarPower,"7000W");
+lv_obj_set_style_text_color(ui_CarPower, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CarPower, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_CarPower, "Power: 7012W");
+
+ui_CarLastCharge = lv_label_create(ui_PanelCar);
+lv_obj_set_width( ui_CarLastCharge, LV_SIZE_CONTENT);  /// 1
+lv_obj_set_height( ui_CarLastCharge, LV_SIZE_CONTENT);   /// 1
+lv_obj_set_x( ui_CarLastCharge, -2 );
+lv_obj_set_y( ui_CarLastCharge, 29 );
+lv_obj_set_align( ui_CarLastCharge, LV_ALIGN_CENTER );
+lv_label_set_text(ui_CarLastCharge,"35kWh");
+lv_obj_set_style_text_color(ui_CarLastCharge, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT );
+lv_obj_set_style_text_opa(ui_CarLastCharge, 255, LV_PART_MAIN| LV_STATE_DEFAULT);
+lv_label_set_text(ui_CarLastCharge, "Last Charge: 42kWh");
 
 }

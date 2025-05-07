@@ -22,19 +22,37 @@ extern lv_obj_t *ui_LabelSetupTitle;
 extern lv_obj_t *ui_LabelWiFiNetwork;
 extern lv_obj_t *ui_LabelIPAddress;
 extern lv_obj_t *ui_LabelURL;
-
-// Add these definitions at the top of ui_ScreenIHD.c
-extern lv_obj_t *ui_GridPower;
-extern lv_obj_t *ui_GridEnergyOut;
-extern lv_obj_t *ui_GridEnergyIn;
-
-// ... Add declarations for all other UI elements
 // CUSTOM VARIABLES
 
 // SCREEN: ui_ScreenIHD
 void ui_ScreenIHD_screen_init(void);
 extern lv_obj_t *ui_ScreenIHD;
 extern lv_obj_t *ui_Label6;
+extern lv_obj_t *ui_PanelGrid;
+extern lv_obj_t *ui_GridPower;
+extern lv_obj_t *ui_GridEnergyIn;
+extern lv_obj_t *ui_GridEnergyOut;
+extern lv_obj_t *ui_GridEnergyOutPrice;
+extern lv_obj_t *ui_GridEnergyInPrice;
+extern lv_obj_t *ui_PanelLoad;
+extern lv_obj_t *ui_LoadPower;
+extern lv_obj_t *ui_LoadEnergy;
+extern lv_obj_t *ui_PanelPV;
+extern lv_obj_t *ui_PVPower;
+extern lv_obj_t *ui_PVEnergy;
+extern lv_obj_t *ui_PanelBattery;
+extern lv_obj_t *ui_BatteryPower;
+extern lv_obj_t *ui_BatteryEnergyIn;
+extern lv_obj_t *ui_BatteryEnergyOut;
+extern lv_obj_t *ui_BatterySOC;
+extern lv_obj_t *ui_BatteryTemp;
+extern lv_obj_t *ui_PanelCar;
+extern lv_obj_t *ui_CarSOC;
+extern lv_obj_t *ui_CarPlug;
+extern lv_obj_t *ui_CarRange;
+extern lv_obj_t *ui_CarMode;
+extern lv_obj_t *ui_CarPower;
+extern lv_obj_t *ui_CarLastCharge;
 // CUSTOM VARIABLES
 
 // EVENTS
