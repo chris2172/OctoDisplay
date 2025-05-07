@@ -12,7 +12,6 @@ Description	:	The code is currently available based on the course on YouTube,
 #include <WiFi.h>
 #include <WebServer.h>
 #include <Preferences.h>
-
 #include <Wire.h>
 #include <SPI.h>
 #include <lvgl.h>
@@ -28,19 +27,25 @@ static lv_disp_drv_t disp_drv;
 // For nonvolatile storage (ESP32)
 Preferences preferences;
 
-// Default MQTT port (as a string for storage; you could also store it as an int)
+// Default MQTT port
 const String defaultMQTTPort = "1883";
 
 // Web server running on port 80
 WebServer server(80);
 
-// Flag to tell whether we need configuration
+// Flag to tell whether configuration is missing
 bool configMissing = false;
 
-// ---------------------------------------------------------------------------
-// 1. Function to load settings from nonvolatile storage.
-//    If any required value is missing, we mark configMissing true.
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------
+// Button reset configuration settings variables
+// ---------------------------------------------------
+const int resetButtonPin = 0;  // Change this if needed.
+unsigned long buttonPressStart = 0;
+const unsigned long holdDuration = 20000; // 20,000 milliseconds = 20 seconds
+
+// ---------------------------------------------------
+// 1. Load configuration and flag missing settings
+// ---------------------------------------------------
 void loadConfigurations() {
     preferences.begin("config", false);
     String wifiSSID = preferences.getString("wifiSSID", "");
@@ -52,113 +57,73 @@ void loadConfigurations() {
     String mqttPass = preferences.getString("mqttPass", "");
     String mqttPort = preferences.getString("mqttPort", "");
     
-    // Check if essential values are provided (except mqttPort, which gets a default)
+    // Check essential values (MQTT port gets a default if missing)
     if (wifiSSID == "" || wifiPass == "" || haAPI == "" || haIP == "" ||
         mqttHost == "" || mqttUser == "" || mqttPass == "") {
         configMissing = true;
     }
-
-    // If MQTT Port is not set, save the default
+    
     if (mqttPort == "") {
         preferences.putString("mqttPort", defaultMQTTPort);
     }
     preferences.end();
 }
 
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------
 // 2. Webserver handlers for the configuration portal
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------
 void handleRoot() {
-    // Generate a simple HTML form with fields for each setting.
     String page = "<!DOCTYPE html>"
-              "<html lang='en'>"
-              "<head>"
-              "  <meta charset='UTF-8'>"
-              "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
-              "  <title>Device Configuration</title>"
-              "  <style>"
-              "    body {"
-              "      font-family: Arial, sans-serif;"
-              "      background-color: #f7f7f7;"
-              "      margin: 0;"
-              "      padding: 0;"
-              "    }"
-              "    .container {"
-              "      max-width: 600px;"
-              "      margin: 50px auto;"
-              "      background: #fff;"
-              "      padding: 30px;"
-              "      border-radius: 8px;"
-              "      box-shadow: 0 2px 8px rgba(0,0,0,0.1);"
-              "    }"
-              "    h1 {"
-              "      text-align: center;"
-              "      color: #333;"
-              "      margin-bottom: 30px;"
-              "    }"
-              "    form {"
-              "      display: flex;"
-              "      flex-direction: column;"
-              "    }"
-              "    label {"
-              "      margin: 10px 0 5px;"
-              "      font-weight: bold;"
-              "    }"
-              "    input[type='text'],"
-              "    input[type='password'] {"
-              "      padding: 10px;"
-              "      border: 1px solid #ccc;"
-              "      border-radius: 4px;"
-              "      font-size: 16px;"
-              "    }"
-              "    input[type='submit'] {"
-              "      margin-top: 20px;"
-              "      padding: 10px;"
-              "      background-color: #4CAF50;"
-              "      border: none;"
-              "      border-radius: 4px;"
-              "      color: #fff;"
-              "      font-size: 16px;"
-              "      cursor: pointer;"
-              "    }"
-              "    input[type='submit']:hover {"
-              "      background-color: #45a049;"
-              "    }"
-              "  </style>"
-              "</head>"
-              "<body>"
-              "  <div class='container'>"
-              "    <h1>Configure Your Device</h1>"
-              "    <form method='POST' action='/save'>"
-              "      <label for='wifiSSID'>Wifi SSID:</label>"
-              "      <input type='text' id='wifiSSID' name='wifiSSID'>"
-              "      <label for='wifiPass'>Wifi Password:</label>"
-              "      <input type='password' id='wifiPass' name='wifiPass'>"
-              "      <label for='haAPI'>Home Assistant API:</label>"
-              "      <input type='text' id='haAPI' name='haAPI'>"
-              "      <label for='haIP'>Home Assistant IP:</label>"
-              "      <input type='text' id='haIP' name='haIP'>"
-              "      <label for='mqttHost'>MQTT Host:</label>"
-              "      <input type='text' id='mqttHost' name='mqttHost'>"
-              "      <label for='mqttUser'>MQTT User:</label>"
-              "      <input type='text' id='mqttUser' name='mqttUser'>"
-              "      <label for='mqttPass'>MQTT Password:</label>"
-              "      <input type='password' id='mqttPass' name='mqttPass'>"
-              "      <label for='mqttPort'>MQTT Port:</label>"
-              "      <input type='text' id='mqttPort' name='mqttPort' placeholder='1883'>"
-              "      <input type='submit' value='Submit'>"
-              "    </form>"
-              "  </div>"
-              "</body>"
-              "</html>";
-
+                  "<html lang='en'>"
+                  "<head>"
+                  "  <meta charset='UTF-8'>"
+                  "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+                  "  <title>Device Configuration</title>"
+                  "  <style>"
+                  "    body { font-family: Arial, sans-serif; background-color: #f7f7f7; margin:0; padding:0; }"
+                  "    .container { max-width: 600px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 8px;"
+                  "                 box-shadow: 0 2px 8px rgba(0,0,0,0.1); }"
+                  "    h1 { text-align: center; color: #333; margin-bottom: 30px; }"
+                  "    form { display: flex; flex-direction: column; }"
+                  "    label { margin: 10px 0 5px; font-weight: bold; }"
+                  "    input[type='text'], input[type='password'] { padding: 10px; border: 1px solid #ccc;"
+                  "                 border-radius: 4px; font-size: 16px; }"
+                  "    input[type='submit'] { margin-top: 20px; padding: 10px; background-color: #4CAF50; "
+                  "                 border: none; border-radius: 4px; color: #fff; font-size: 16px; cursor: pointer; }"
+                  "    input[type='submit']:hover { background-color: #45a049; }"
+                  "  </style>"
+                  "</head>"
+                  "<body>"
+                  "  <div class='container'>"
+                  "    <h1>Configure Your Device</h1>"
+                  "    <form method='POST' action='/save'>"
+                  "      <label for='wifiSSID'>Wifi SSID:</label>"
+                  "      <input type='text' id='wifiSSID' name='wifiSSID'>"
+                  "      <label for='wifiPass'>Wifi Password:</label>"
+                  "      <input type='password' id='wifiPass' name='wifiPass'>"
+                  "      <label for='haAPI'>Home Assistant API:</label>"
+                  "      <input type='text' id='haAPI' name='haAPI'>"
+                  "      <label for='haIP'>Home Assistant IP:</label>"
+                  "      <input type='text' id='haIP' name='haIP'>"
+                  "      <label for='mqttHost'>MQTT Host:</label>"
+                  "      <input type='text' id='mqttHost' name='mqttHost'>"
+                  "      <label for='mqttUser'>MQTT User:</label>"
+                  "      <input type='text' id='mqttUser' name='mqttUser'>"
+                  "      <label for='mqttPass'>MQTT Password:</label>"
+                  "      <input type='password' id='mqttPass' name='mqttPass'>"
+                  "      <label for='mqttPort'>MQTT Port:</label>"
+                  "      <input type='text' id='mqttPort' name='mqttPort' placeholder='1883'>"
+                  "      <input type='submit' value='Submit'>"
+                  "    </form>"
+                  "  </div>"
+                  "</body>"
+                  "</html>";
     server.send(200, "text/html", page);
 }
 
 void handleSave() {
     if (server.method() == HTTP_POST) {
         preferences.begin("config", false);
-        // Save the values from the form submission
         preferences.putString("wifiSSID", server.arg("wifiSSID"));
         preferences.putString("wifiPass", server.arg("wifiPass"));
         preferences.putString("haAPI", server.arg("haAPI"));
@@ -174,39 +139,29 @@ void handleSave() {
         preferences.putString("mqttPort", port);
         preferences.end();
         
-        // Inform the user and then restart
         server.send(200, "text/html", "Settings saved. The device will now restart.");
         delay(2000);
         ESP.restart();
     }
 }
 
-// ---------------------------------------------------------------------------
-// 3. Function to start the configuration portal: 
-//    sets up an access point and the web server.
-// ---------------------------------------------------------------------------
 void startConfigPortal() {
-    // Start Wi-Fi in Access Point mode with no password.
     WiFi.softAP("OctoDisplay");
     IPAddress ip = WiFi.softAPIP();
-    Serial.print("AP started. Connect to AP IP: ");
-    Serial.println(ip);
-
-    // Update the display's LabelURL on ui_ScreenSetup with the AP IP.
-    // (Assuming you have a function or method to update that label.)
-    // For example:
-    // ui_LabelURL->setText(ip.toString().c_str());
-
-    // Set web server routes.
+    Serial.print("AP started. Connect to AP IP: "); Serial.println(ip);
+    
+    // Update the setup screen’s LabelURL if needed:
+    // For example: ui_LabelURL->setText(ip.toString().c_str());
+    
     server.on("/", HTTP_GET, handleRoot);
     server.on("/save", HTTP_POST, handleSave);
     server.begin();
     Serial.println("Configuration web server started.");
 }
 
-// ---------------------------------------------------------------------------
-// 4. Display and Touch callbacks (same as your current code)
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------
+// 3. Display and touch callback functions (unchanged)
+// ---------------------------------------------------
 void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area, lv_color_t *color_p) {
     uint32_t w = (area->x2 - area->x1 + 1);
     uint32_t h = (area->y2 - area->y1 + 1);
@@ -230,15 +185,18 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
     }
 }
 
-// ---------------------------------------------------------------------------
-// 5. Setup: initialize display, load configuration, and either launch
-//    the config portal or proceed to connect to Wi-Fi.
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------
+// 4. Setup: initialize hardware, display, configuration and WiFi logic
+// ---------------------------------------------------
 void setup() {
     Serial.begin(115200);
     Serial.println("Starting CrowPanel ESP32 Display Project");
-
-    // GPIO initialization as per your board (CrowPanel 4.3" example)
+    
+    // Configure the reset (boot) button pin.
+    // NOTE: Confirm that this pin doesn't conflict with other functions (e.g., touchscreen).
+    pinMode(resetButtonPin, INPUT_PULLUP);
+    
+    // Board-specific GPIO initialization (example for CrowPanel 4.3")
     #if defined (CrowPanel_43)
       pinMode(20, OUTPUT);
       digitalWrite(20, LOW);
@@ -248,10 +206,10 @@ void setup() {
       digitalWrite(35, LOW);
       pinMode(38, OUTPUT);
       digitalWrite(38, LOW);
-      pinMode(0, OUTPUT);  // TOUCH-CS
+      // The following line was originally for TOUCH-CS. Adjust as needed.
+      // pinMode(0, OUTPUT); // Already used as resetButtonPin in this example.
     #endif
 
-    // Display initialization (your existing code)
     tft.begin();
     tft.fillScreen(TFT_BLACK);
     tft.setTextSize(2);
@@ -275,59 +233,71 @@ void setup() {
     lv_indev_drv_register(&indev_drv);
 
     tft.fillScreen(TFT_BLACK);
-
-    // Initialize UI (this sets up your default screen(s))
     ui_init();
 
-    // Load configuration settings from nonvolatile storage.
     loadConfigurations();
 
     if (configMissing) {
         Serial.println("Configuration missing. Launching config portal mode.");
-        // Switch the display to the setup screen.
-        // For example, if you have a function to change screens:
-        // showScreen(ui_ScreenSetup);
+        // Optionally switch display to ui_ScreenSetup here.
         startConfigPortal();
     } else {
-        // If all required settings are present, attempt to connect to Wi-Fi.
+        // If configuration exists, connect to WiFi.
         preferences.begin("config", false);
         String ssid = preferences.getString("wifiSSID", "");
         String pass = preferences.getString("wifiPass", "");
         preferences.end();
-
-        Serial.print("Connecting to WiFi: ");
-        Serial.println(ssid);
+    
+        Serial.print("Connecting to WiFi: "); Serial.println(ssid);
         WiFi.begin(ssid.c_str(), pass.c_str());
     
         int counter = 0;
-        while (WiFi.status() != WL_CONNECTED && counter < 40) {  // wait up to 20 seconds
+        while (WiFi.status() != WL_CONNECTED && counter < 40) {  // wait up to ~20 seconds
             delay(500);
             Serial.print(".");
             counter++;
         }
         if (WiFi.status() == WL_CONNECTED) {
             Serial.println("\nWiFi Connected!");
-            // Switch to the normal operational screen.
-            // For example:
-            // showScreen(ui_ScreenIHD);
-            // And update Label6 with a positive connection status:
-            // ui_Label6->setText("Connected.");
+            // Optionally switch display to ui_ScreenIHD and update status Label6.
         } else {
             Serial.println("\nWiFi connection failed.");
-            // Consider reverting to configuration mode or displaying an error.
+            // Handle failed connection appropriately.
         }
     }
     Serial.println("Setup done.");
 }
 
-// ---------------------------------------------------------------------------
-// 6. Loop: handle LVGL tasks and (if in config mode) web server requests.
-// ---------------------------------------------------------------------------
+// ---------------------------------------------------
+// 5. Loop: LVGL tasks, config portal handling and reset check.
+// ---------------------------------------------------
 void loop() {
     lv_timer_handler();
-    // If the device is in configuration mode, keep handling web server requests.
+    
+    // Check if the reset button is held for 20 seconds
+    if (digitalRead(resetButtonPin) == LOW) {  // Assuming active LOW (pressed)
+        if (buttonPressStart == 0) {
+            buttonPressStart = millis();  // Start timing the press
+        } else {
+            // If pressed continuously for 20 seconds, clear settings
+            if (millis() - buttonPressStart >= holdDuration) {
+                Serial.println("Boot button held for 20 seconds. Clearing configuration...");
+                preferences.begin("config", false);
+                preferences.clear();
+                preferences.end();
+                delay(1000);
+                ESP.restart();
+            }
+        }
+    } else {
+        // Button released; reset the timer
+        buttonPressStart = 0;
+    }
+    
+    // If in configuration portal mode, handle web server client requests.
     if (configMissing) {
         server.handleClient();
     }
+    
     delay(5);
 }
