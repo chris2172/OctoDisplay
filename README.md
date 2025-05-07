@@ -678,7 +678,7 @@ elecrow/car
 
 All with sub topics so I need the code to be easily editable to add additional topics
 
-'''C
+```C
 #include <WiFi.h>
 #include <WebServer.h>
 #include <Preferences.h>
@@ -909,4 +909,4 @@ void loadConfigurations() {
     // Check for essential values
     if (wifiSSID == "" || wifiPass == "" || haAPI == "" || haIP == "" ||
         mqtt
-'''
+```
